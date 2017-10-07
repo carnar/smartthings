@@ -170,6 +170,9 @@ def initialize()
 
 def motionActiveHandler(evt) 
 {
+    if(ovrSwitch.currentValue("switch") == "on")
+        return;
+
     // check if override switch is currently on
     // this will prevent no-motion from turning the light back off
     def switchState = ovrSwitch.currentValue("switch") // = "on" or "off"
@@ -181,21 +184,19 @@ def motionActiveHandler(evt)
             return;
   
         logEvent("Motion Detected, turning lights on", true)
-        state.didMotionTurnOn = true // flag that motion turned switch on
         lights.setLevel(dimmerLevel);
         lights.on()
     }
-    else if (state.didMotionTurnOn != true)
+    else
     {
         // switch was already on before motion started
-        logEvent("override switch is on, ignoring motion", true)
-        state.didMotionTurnOn = false
+        logEvent("Light automation is off, ignoring motion", true)
     }
 }
 
 def motionInactiveHandler(evt) 
 {
-    if (state.didMotionTurnOn == true) // did motion detector turn the light on ?
+    if(ovrSwitch.currentValue("switch") == "off") // did motion detector turn the light on ?
     {
         logEvent("Motion Stopped")
         runIn(seconds, checkMotion)
@@ -214,7 +215,7 @@ def checkMotion()
     {
         logEvent("turning lights off", true)
         lights.off()
-        state.didMotionTurnOn = false
+        //state.didMotionTurnOn = false
     } 
     else 
     {
